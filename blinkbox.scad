@@ -1,13 +1,15 @@
 boardThickness = 1.5;
+boardDimensions = [56, 33];
 wallThickness = 1.6;
 ledHeight = 9;
 spaceUnderBoard = 3;
-verticalTolerance = 0.1;
+verticalTolerance = 0.2;
+horizontalTolerance = 0.4;
 
 boxInnerHeight = spaceUnderBoard + boardThickness + ledHeight + verticalTolerance;
 boxHeight = boxInnerHeight + (wallThickness * 2);
 
-bottomInner = [56, 33];
+bottomInner = [for (a = boardDimensions) a + horizontalTolerance * 2];
 cornerCoords = [for (a = bottomInner) a / 2];
 bottom = [for (a = bottomInner) a + wallThickness * 2];
 
@@ -16,7 +18,6 @@ buttonsOffsetY = 5.5;
 buttonsDistance = 10;
 buttonHeight = 5;
 buttonWidth = 7;
-buttonTolerance = 0.2;
 presserRadius = 2;
 cornerHeight = 2;
 cornerWidth = 3;
@@ -108,7 +109,7 @@ for (i = [0 : 2]) {
         0,
     ])
     linear_extrude(wallThickness * 2)
-    square(buttonWidth - buttonTolerance * 2, true);
+    square(buttonWidth - horizontalTolerance * 2, true);
     
     // button back
     translate([
@@ -117,7 +118,7 @@ for (i = [0 : 2]) {
         wallThickness,
     ])
     linear_extrude(wallThickness)
-    square(buttonWidth + buttonTolerance * 2, true);
+    square(buttonWidth + horizontalTolerance * 2, true);
     
     // presser
     translate([
@@ -125,6 +126,6 @@ for (i = [0 : 2]) {
         cornerCoords[1] - buttonsOffsetY,
         0,
     ])
-    linear_extrude(ledHeight - buttonHeight + wallThickness)
+    linear_extrude(ledHeight - buttonHeight + wallThickness - verticalTolerance * 2)
     circle(presserRadius, $fn=20);
 };
