@@ -53,7 +53,7 @@ module cornerLimitor() {
     translate([
         cornerCoords[0],
         cornerCoords[1],
-        boxHeight - spaceUnderBoard - boardThickness - cornerHeight - verticalTolerance
+        wallThickness + ledHeight - cornerHeight - verticalTolerance
     ])
     linear_extrude(cornerHeight)
     polygon([[0, 0], [0, -cornerWidth], [-cornerWidth, 0]]);
@@ -66,14 +66,14 @@ mirror([0, -1, 0]) mirror([-1, 0, 0]) cornerLimitor();
 // Bottom limitors
 bottomLimitorDepth = 0.8;
 bottomLimitorWidth = 5;
+bottomLimitorZ = wallThickness + ledHeight + boardThickness + verticalTolerance * 2;
 module bottomLimitor() {
     translate([
         0,
         cornerCoords[1] - bottomLimitorDepth / 2,
-        // boxHeight - wallThickness,
-        boxHeight - spaceUnderBoard - wallThickness
+        bottomLimitorZ
     ])
-    linear_extrude(spaceUnderBoard + wallThickness)
+    linear_extrude(boxHeight - bottomLimitorZ - wallThickness)
     square([bottomLimitorWidth, bottomLimitorDepth], true);
 };
 bottomLimitor();
