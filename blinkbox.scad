@@ -21,14 +21,16 @@ buttonWidth = 7;
 presserRadius = 2;
 cornerHeight = 2;
 cornerWidth = 3;
+clipWidth = 5;
+
 
 // Face
 difference() {
     // Bottom of the box (top of the model)
     linear_extrude(wallThickness) square(bottom, true);
     
-    // Button holes
     union() {
+        // Button holes
         for (i = [0 : 2]) {
             translate([
                 cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
@@ -38,23 +40,45 @@ difference() {
             linear_extrude(wallThickness) square(buttonWidth, true);
         }
     };
+
 };
 
 // Walls
-linear_extrude(boxHeight) {
-    
-    difference() {
-        square(bottom, true);
-        square(bottomInner, true);
-    }
+// side hole (used when rendering walls)
+sideHoleHeight = wallThickness + ledHeight + boardThickness + verticalTolerance * 2;
+module sideHole() {
+    translate([
+        cornerCoords[0] + wallThickness / 2,
+        0,
+        sideHoleHeight,
+    ])
+    linear_extrude(wallThickness + verticalTolerance * 2)
+    square([wallThickness * 2, clipWidth + horizontalTolerance * 2], true);
 };
+
+difference() {
+    
+    // walls themselves
+    linear_extrude(boxHeight) {
+        
+        difference() {
+            square(bottom, true);
+            square(bottomInner, true);
+        }
+    };
+          
+    // Side holes
+    sideHole();
+    mirror([-1, 0, 0]) sideHole();
+    
+}
 
 // Corner limitors
 module cornerLimitor() {
     translate([
         cornerCoords[0],
         cornerCoords[1],
-        wallThickness + ledHeight - cornerHeight - verticalTolerance
+        wallThickness + ledHeight - cornerHeight + verticalTolerance
     ])
     linear_extrude(cornerHeight)
     polygon([[0, 0], [0, -cornerWidth], [-cornerWidth, 0]]);
@@ -64,6 +88,7 @@ mirror([0, -1, 0]) cornerLimitor();
 mirror([-1, 0, 0]) cornerLimitor();
 mirror([0, -1, 0]) mirror([-1, 0, 0]) cornerLimitor();
 
+/*
 // Bottom limitors
 bottomLimitorDepth = 0.8;
 bottomLimitorWidth = 5;
@@ -97,35 +122,80 @@ module bottomLimitorOrig() {
     square([bottomLimitorWidth, bottomLimitorDepth], true);
 };
 // bottomLimitorOrig();
+*/
 
 // Buttons
-translate([0, buttonsOffsetY * 2 + wallThickness, 0])
-for (i = [0 : 2]) {
-    
-    // button face
+module buttons() {
+    for (i = [0 : 2]) {
+        
+        // button face
+        translate([
+            cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
+            cornerCoords[1] - buttonsOffsetY,
+            0,
+        ])
+        linear_extrude(wallThickness * 2)
+        square(buttonWidth - horizontalTolerance * 2, true);
+        
+        // button back
+        translate([
+            cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
+            cornerCoords[1] - buttonsOffsetY,
+            wallThickness,
+        ])
+        linear_extrude(wallThickness)
+        square(buttonWidth + horizontalTolerance * 2, true);
+        
+        // presser
+        translate([
+            cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
+            cornerCoords[1] - buttonsOffsetY,
+            0,
+        ])
+        linear_extrude(ledHeight - buttonHeight + wallThickness - verticalTolerance)
+        circle(presserRadius, $fn=20);
+    };
+};
+translate([0, buttonsOffsetY * 2 + wallThickness, 0]) buttons();
+
+
+// Uncomment this to test how buttons fit
+// translate([0, 0, verticalTolerance]) buttons();
+
+
+// Cover
+module coverLocker() {
     translate([
-        cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
-        cornerCoords[1] - buttonsOffsetY,
+        (boardDimensions[0] - wallThickness) / 2,
         0,
+        sideHoleHeight - boxHeight
     ])
     linear_extrude(wallThickness * 2)
-    square(buttonWidth - horizontalTolerance * 2, true);
+    square([wallThickness, clipWidth], true);
     
-    // button back
     translate([
-        cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
-        cornerCoords[1] - buttonsOffsetY,
-        wallThickness,
+        (boardDimensions[0] + horizontalTolerance * 2) / 2,
+        0,
+        sideHoleHeight - boxHeight + verticalTolerance
     ])
     linear_extrude(wallThickness)
-    square(buttonWidth + horizontalTolerance * 2, true);
-    
-    // presser
+    square([horizontalTolerance * 3, clipWidth], true);
+}
+module cover() union() {
+    // cover plage
     translate([
-        cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
-        cornerCoords[1] - buttonsOffsetY,
         0,
+        0,
+        - wallThickness
     ])
-    linear_extrude(ledHeight - buttonHeight + wallThickness - verticalTolerance * 2)
-    circle(presserRadius, $fn=20);
+    linear_extrude(wallThickness)
+    square(boardDimensions, true);
+    coverLocker();
+    mirror([-1, 0, 0]) coverLocker();
 };
+mirror([0, 0, -1])
+translate([0, - (bottom[1] + wallThickness), 0])
+cover();
+
+// Uncomment this to test how cover fits:
+// translate([0, 0, boxHeight]) cover();
