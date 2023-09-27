@@ -67,7 +67,26 @@ mirror([0, -1, 0]) mirror([-1, 0, 0]) cornerLimitor();
 bottomLimitorDepth = 0.8;
 bottomLimitorWidth = 5;
 bottomLimitorZ = wallThickness + ledHeight + boardThickness + verticalTolerance * 2;
+bottomLimitorHeight = boxHeight - bottomLimitorZ - wallThickness;
 module bottomLimitor() {
+    translate([
+        - bottomLimitorWidth / 2,
+        cornerCoords[1],
+        bottomLimitorZ
+    ])
+    rotate([180, -90, 0])
+    linear_extrude(bottomLimitorWidth)
+    polygon([
+        [0, 0],
+        [bottomLimitorHeight, 0],
+        [0, bottomLimitorDepth]
+    ]);
+};
+bottomLimitor();
+mirror([0, -1, 0]) bottomLimitor();
+
+// (original bottom limitor, for reference)
+module bottomLimitorOrig() {
     translate([
         0,
         cornerCoords[1] - bottomLimitorDepth / 2,
@@ -76,11 +95,10 @@ module bottomLimitor() {
     linear_extrude(boxHeight - bottomLimitorZ - wallThickness)
     square([bottomLimitorWidth, bottomLimitorDepth], true);
 };
-bottomLimitor();
-mirror([0, -1, 0]) bottomLimitor();
+// bottomLimitorOrig();
 
 // Buttons
-translate([0, buttonsOffsetY * 2, 0])
+translate([0, buttonsOffsetY * 2 + wallThickness, 0])
 for (i = [0 : 2]) {
     
     // button face
