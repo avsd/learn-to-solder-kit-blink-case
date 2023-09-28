@@ -75,11 +75,12 @@ difference() {
 }
 
 // Corner limitors
+cornerLimitorZ = wallThickness + ledHeight + verticalTolerance;
 module cornerLimitor() {
     translate([
         cornerCoords[0],
         cornerCoords[1],
-        wallThickness + ledHeight - cornerHeight + verticalTolerance
+        cornerLimitorZ - cornerHeight
     ])
     linear_extrude(cornerHeight)
     polygon([[0, 0], [0, -cornerWidth], [-cornerWidth, 0]]);
@@ -88,6 +89,7 @@ cornerLimitor();
 mirror([0, -1, 0]) cornerLimitor();
 mirror([-1, 0, 0]) cornerLimitor();
 mirror([0, -1, 0]) mirror([-1, 0, 0]) cornerLimitor();
+
 
 // Buttons
 module buttons() {
@@ -124,43 +126,77 @@ module buttons() {
 translate([0, buttonsOffsetY * 2 + wallThickness, 0]) buttons();
 
 
-// Uncomment this to test how buttons fit
-// translate([0, 0, verticalTolerance]) buttons();
-
-
 // Cover
-module coverLocker() {
+jambDepth = horizontalTolerance * 2 + 0.3;
+coverRestOffset = 10;
+coverRestLength = 5;
+module coverPlate()
+    translate([0, 0, boxHeight - wallThickness])
+    linear_extrude(wallThickness)
+    square(boardDimensions, true);
+module coverRest()
+    translate([
+        (boardDimensions[0] - coverRestLength) / 2 - coverRestOffset,
+        (boardDimensions[1] - wallThickness) / 2,
+        cornerLimitorZ + boardThickness])
+    linear_extrude(spaceUnderBoard + wallThickness)
+    square([coverRestLength, wallThickness], true);
+
+module cover() union() {
+    // cover plate
+    coverPlate();
+
+    // cover locker
     translate([
         (boardDimensions[0] - wallThickness) / 2,
         0,
-        sideHoleHeight - boxHeight
+        cornerLimitorZ + boardThickness
     ])
-    linear_extrude(wallThickness * 2)
+    linear_extrude(spaceUnderBoard + wallThickness)
     square([wallThickness, clipWidth], true);
 
     translate([
-        (boardDimensions[0] + horizontalTolerance * 2) / 2,
+        boardDimensions[0] / 2 + horizontalTolerance,
         0,
-        sideHoleHeight - boxHeight + verticalTolerance
+        sideHoleHeight + verticalTolerance * 2
     ])
     linear_extrude(wallThickness)
-    square([horizontalTolerance * 3, clipWidth], true);
-}
-module cover() union() {
-    // cover plage
+    square([wallThickness * 2, clipWidth], true);
+
+    // cover jamb (clicker)
     translate([
+        - (boardDimensions[0]) / 2 ,
+        -clipWidth / 2,
+        cornerLimitorZ + boardThickness + wallThickness + verticalTolerance * 3
+        ])
+        rotate([0, 90, 90])
+        linear_extrude(clipWidth, true)
+        polygon([[0, 0], [wallThickness, 0], [0, jambDepth]]);
+    translate([
+        - (boardDimensions[0] - wallThickness) / 2,
         0,
-        0,
-        - wallThickness
+        cornerLimitorZ + boardThickness + verticalTolerance * 3
     ])
-    linear_extrude(wallThickness)
-    square(boardDimensions, true);
-    coverLocker();
-    mirror([-1, 0, 0]) coverLocker();
+    linear_extrude(spaceUnderBoard + wallThickness - verticalTolerance * 3)
+    square([wallThickness, clipWidth], true);
+
+    // cover rests
+    coverRest();
+    mirror([0, -1, 0]) coverRest();
+
 };
 mirror([0, 0, -1])
-translate([0, - (bottom[1] + wallThickness), 0])
+translate([0, - (bottom[1] + wallThickness), -boxHeight])
 cover();
 
-// Uncomment this to test how cover fits:
-// translate([0, 0, boxHeight]) cover();
+
+// Board (not part of the model!)
+module board() {
+    translate([0, 0, cornerLimitorZ])
+    linear_extrude(boardThickness)
+    square(boardDimensions, true);
+}
+
+// board();  // <-- Uncomment to render the board
+// cover();     // <-- Uncomment to test how cover fits
+// translate([0, 0, verticalTolerance]) buttons();  <-- // Uncomment to test how buttons fit
