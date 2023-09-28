@@ -4,9 +4,10 @@
 
 3D-printable case for Learn To Solder Kit blink v1.1
 
+![Printed case with Blink v1.1 board](./photo.jpg)
+
 
 ## License
-
 
 This work is licensed under a
 [Creative Commons Attribution 4.0 International License][cc-by].
