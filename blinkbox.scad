@@ -1,3 +1,4 @@
+// Board & case dimensions
 boardThickness = 1.5;
 boardDimensions = [56, 33];
 wallThickness = 1.6;
@@ -13,6 +14,7 @@ bottomInner = [for (a = boardDimensions) a + horizontalTolerance * 2];
 cornerCoords = [for (a = bottomInner) a / 2];
 bottom = [for (a = bottomInner) a + wallThickness * 2];
 
+// Button dimensions
 buttonsOffsetX = 4.5;
 buttonsOffsetY = 5.5;
 buttonsDistance = 10;
@@ -28,7 +30,7 @@ clipWidth = 5;
 difference() {
     // Bottom of the box (top of the model)
     linear_extrude(wallThickness) square(bottom, true);
-    
+
     union() {
         // Button holes
         for (i = [0 : 2]) {
@@ -44,9 +46,9 @@ difference() {
 };
 
 // Walls
-// side hole (used when rendering walls)
 sideHoleHeight = wallThickness + ledHeight + boardThickness + verticalTolerance * 2;
 module sideHole() {
+    // side hole (used when rendering walls)
     translate([
         cornerCoords[0] + wallThickness / 2,
         0,
@@ -55,22 +57,21 @@ module sideHole() {
     linear_extrude(wallThickness + verticalTolerance * 2)
     square([wallThickness * 2, clipWidth + horizontalTolerance * 2], true);
 };
-
 difference() {
-    
+
     // walls themselves
     linear_extrude(boxHeight) {
-        
+
         difference() {
             square(bottom, true);
             square(bottomInner, true);
         }
     };
-          
+
     // Side holes
     sideHole();
     mirror([-1, 0, 0]) sideHole();
-    
+
 }
 
 // Corner limitors
@@ -88,46 +89,10 @@ mirror([0, -1, 0]) cornerLimitor();
 mirror([-1, 0, 0]) cornerLimitor();
 mirror([0, -1, 0]) mirror([-1, 0, 0]) cornerLimitor();
 
-/*
-// Bottom limitors
-bottomLimitorDepth = 0.8;
-bottomLimitorWidth = 5;
-bottomLimitorZ = wallThickness + ledHeight + boardThickness + verticalTolerance * 2;
-bottomLimitorHeight = boxHeight - bottomLimitorZ - wallThickness;
-module bottomLimitor() {
-    translate([
-        - bottomLimitorWidth / 2,
-        cornerCoords[1],
-        bottomLimitorZ
-    ])
-    rotate([180, -90, 0])
-    linear_extrude(bottomLimitorWidth)
-    polygon([
-        [0, 0],
-        [bottomLimitorHeight, 0],
-        [0, bottomLimitorDepth]
-    ]);
-};
-bottomLimitor();
-mirror([0, -1, 0]) bottomLimitor();
-
-// (original bottom limitor, for reference)
-module bottomLimitorOrig() {
-    translate([
-        0,
-        cornerCoords[1] - bottomLimitorDepth / 2,
-        bottomLimitorZ
-    ])
-    linear_extrude(boxHeight - bottomLimitorZ - wallThickness)
-    square([bottomLimitorWidth, bottomLimitorDepth], true);
-};
-// bottomLimitorOrig();
-*/
-
 // Buttons
 module buttons() {
     for (i = [0 : 2]) {
-        
+
         // button face
         translate([
             cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
@@ -136,7 +101,7 @@ module buttons() {
         ])
         linear_extrude(wallThickness * 2)
         square(buttonWidth - horizontalTolerance * 2, true);
-        
+
         // button back
         translate([
             cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
@@ -145,7 +110,7 @@ module buttons() {
         ])
         linear_extrude(wallThickness)
         square(buttonWidth + horizontalTolerance * 2, true);
-        
+
         // presser
         translate([
             cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
@@ -172,7 +137,7 @@ module coverLocker() {
     ])
     linear_extrude(wallThickness * 2)
     square([wallThickness, clipWidth], true);
-    
+
     translate([
         (boardDimensions[0] + horizontalTolerance * 2) / 2,
         0,
