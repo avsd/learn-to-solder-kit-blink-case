@@ -19,11 +19,14 @@ buttonsOffsetX = 4.5;
 buttonsOffsetY = 5.5;
 buttonsDistance = 10;
 buttonHeight = 5;
+buttonExtraHeight = 1;
 buttonWidth = 7;
 presserRadius = 2;
 cornerHeight = 2;
 cornerWidth = 3;
 clipWidth = 5;
+letters = "RGB";
+letterHeight = 0.4;
 
 
 // Face
@@ -92,38 +95,35 @@ mirror([0, -1, 0]) mirror([-1, 0, 0]) cornerLimitor();
 
 
 // Buttons
+module drawLetter(l)
+    linear_extrude(letterHeight)
+    text(l, size=buttonWidth * 0.8, halign="center", valign="center");
 module buttons() {
     for (i = [0 : 2]) {
 
+        bnX = cornerCoords[0] - buttonsOffsetX - buttonsDistance * i;
+        bnY = cornerCoords[1] - buttonsOffsetY;
+
         // button face
-        translate([
-            cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
-            cornerCoords[1] - buttonsOffsetY,
-            0,
-        ])
-        linear_extrude(wallThickness * 2)
-        square(buttonWidth - horizontalTolerance * 2, true);
+        translate([bnX, bnY, -buttonExtraHeight])
+            difference() {
+                linear_extrude(wallThickness * 2 + buttonExtraHeight)
+                    square(buttonWidth - horizontalTolerance * 2, true);
+                mirror([-1, 0, 0]) drawLetter(letters[i]);
+            };
 
         // button back
-        translate([
-            cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
-            cornerCoords[1] - buttonsOffsetY,
-            wallThickness,
-        ])
-        linear_extrude(wallThickness)
-        square(buttonWidth + horizontalTolerance * 2, true);
+        translate([bnX, bnY, wallThickness])
+            linear_extrude(wallThickness)
+            square(buttonWidth + horizontalTolerance * 2, true);
 
         // presser
-        translate([
-            cornerCoords[0] - buttonsOffsetX - buttonsDistance * i,
-            cornerCoords[1] - buttonsOffsetY,
-            0,
-        ])
-        linear_extrude(ledHeight - buttonHeight + wallThickness - verticalTolerance)
-        circle(presserRadius, $fn=20);
+        translate([bnX, bnY, 0])
+            linear_extrude(ledHeight - buttonHeight + wallThickness - verticalTolerance)
+            circle(presserRadius, $fn=20);
     };
 };
-translate([0, buttonsOffsetY * 2 + wallThickness, 0]) buttons();
+translate([0, buttonsOffsetY * 2 + wallThickness, buttonExtraHeight]) buttons();
 
 
 // Cover
@@ -199,4 +199,5 @@ module board() {
 
 // board();  // <-- Uncomment to render the board
 // cover();     // <-- Uncomment to test how cover fits
-// translate([0, 0, verticalTolerance]) buttons();  <-- // Uncomment to test how buttons fit
+// translate([0, 0, verticalTolerance]) buttons();  // <-- Uncomment to test how buttons fit
+// buttons();  // <-- Uncomment to see how buttons fit at the limit
