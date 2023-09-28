@@ -136,7 +136,7 @@ module coverPlate()
     square(boardDimensions, true);
 module coverRest()
     translate([
-        (boardDimensions[0] - coverRestLength) / 2 - coverRestOffset,
+        coverRestOffset - (boardDimensions[0] - coverRestLength) / 2,
         (boardDimensions[1] - wallThickness) / 2,
         cornerLimitorZ + boardThickness])
     linear_extrude(spaceUnderBoard + wallThickness)
